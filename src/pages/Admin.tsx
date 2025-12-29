@@ -334,7 +334,7 @@ const Admin = () => {
             </div>
 
             <div className="space-y-3 border-t border-border pt-4">
-              <Label>Chamada experimental (segundos)</Label>
+              <Label>Chamada de verificação (segundos)</Label>
               <div className="flex gap-3 items-center">
                 <Input
                   type="number"
@@ -369,12 +369,12 @@ const Admin = () => {
                     setTrialUrl(url);
                   }}
                 >
-                  Gerar link experimental
+                  Gerar link de verificação
                 </Button>
               </div>
               {trialUrl && (
                 <div className="space-y-2">
-                  <Label>Link experimental</Label>
+                  <Label>Link de verificação</Label>
                   <div className="flex gap-2">
                     <Input readOnly value={trialUrl} className="text-xs" />
                     <Button
@@ -383,7 +383,10 @@ const Admin = () => {
                       variant="outline"
                       onClick={async () => {
                         await navigator.clipboard.writeText(trialUrl);
-                        toast({ title: "Copiado", description: "Link experimental copiado." });
+                        toast({
+                          title: "Copiado",
+                          description: "Link de verificação copiado.",
+                        });
                       }}
                     >
                       <ClipboardCopy className="h-4 w-4" />
