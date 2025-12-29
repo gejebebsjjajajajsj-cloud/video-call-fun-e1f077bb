@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      call_config: {
+        Row: {
+          audio_url: string | null
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+          video_url: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

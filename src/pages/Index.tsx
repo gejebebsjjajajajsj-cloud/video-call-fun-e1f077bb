@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Video, PhoneOff, Mic, MicOff, Camera, CameraOff } from "lucide-react";
 import remoteVideoSrc from "@/assets/fake-call-remote.mp4";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MediaState {
   micOn: boolean;
@@ -18,8 +19,12 @@ const Index = () => {
   const [duration, setDuration] = useState(0);
   const [mediaState, setMediaState] = useState<MediaState>({ micOn: true, camOn: true });
   const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [configVideoUrl, setConfigVideoUrl] = useState<string | null>(null);
+  const [configAudioUrl, setConfigAudioUrl] = useState<string | null>(null);
 
   const selfVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const selfStreamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<number | null>(null);
 
@@ -47,6 +52,22 @@ const Index = () => {
       link.href = window.location.href;
       document.head.appendChild(link);
     }
+
+    // Buscar configuração de vídeo e áudio do banco
+    const loadConfig = async () => {
+      const { data } = await supabase
+        .from("call_config")
+        .select("video_url, audio_url")
+        .eq("id", "00000000-0000-0000-0000-000000000000")
+        .single();
+
+      if (data) {
+        setConfigVideoUrl(data.video_url);
+        setConfigAudioUrl(data.audio_url);
+      }
+    };
+
+    loadConfig();
   }, []);
 
   useEffect(() => {
@@ -121,6 +142,33 @@ const Index = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    // Sincronizar áudio com o vídeo remoto quando disponível
+    if (remoteVideoRef.current && remoteAudioRef.current && configAudioUrl) {
+      const video = remoteVideoRef.current;
+      const audio = remoteAudioRef.current;
+
+      const syncAudio = () => {
+        audio.currentTime = video.currentTime;
+        if (!video.paused) {
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
+      };
+
+      video.addEventListener("play", () => audio.play().catch(() => {}));
+      video.addEventListener("pause", () => audio.pause());
+      video.addEventListener("timeupdate", syncAudio);
+
+      return () => {
+        video.removeEventListener("play", syncAudio);
+        video.removeEventListener("pause", syncAudio);
+        video.removeEventListener("timeupdate", syncAudio);
+      };
+    }
+  }, [configAudioUrl]);
+
   const stopMediaTracks = () => {
     if (selfStreamRef.current) {
       selfStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -181,13 +229,19 @@ const Index = () => {
       <main className="relative h-screen w-screen">
         {/* Vídeo remoto ocupando a tela inteira (respeita vídeo em pé) */}
         <video
+          ref={remoteVideoRef}
           className="absolute inset-0 h-full w-full object-contain bg-black"
-          src={remoteVideoSrc}
+          src={configVideoUrl || remoteVideoSrc}
           autoPlay
           loop
           muted
           playsInline
         />
+
+        {/* Áudio da modelo tocando junto com o vídeo */}
+        {configAudioUrl && (
+          <audio ref={remoteAudioRef} src={configAudioUrl} loop />
+        )}
 
         {/* Webcam do cliente no topo direito */}
         <div className="pointer-events-none absolute right-3 top-3 h-32 w-24 overflow-hidden rounded-2xl border border-[hsl(var(--call-surface-soft))] bg-[hsl(var(--call-surface-soft))] shadow-[0_10px_28px_hsl(210_80%_2%/0.85)] sm:right-5 sm:top-5 sm:h-40 sm:w-32">
