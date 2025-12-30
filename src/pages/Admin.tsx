@@ -53,11 +53,12 @@ const Admin = () => {
   }, [navigate]);
 
   const loadCurrentConfig = async () => {
+    const host = window.location.host;
     const { data, error } = await supabase
       .from("call_config")
       .select("video_url, audio_url, duration_seconds")
-      .eq("id", "00000000-0000-0000-0000-000000000000")
-      .single();
+      .eq("site_id", host)
+      .maybeSingle();
 
     if (!error && data) {
       setCurrentConfig(data);
@@ -117,11 +118,14 @@ const Admin = () => {
         audioUrl = publicUrl;
       }
 
-      // Atualizar configuração no banco
+      // Atualizar configuração no banco para este site/domínio
+      const host = window.location.host;
       const { error: updateError } = await supabase
         .from("call_config")
-        .update({ video_url: videoUrl, audio_url: audioUrl })
-        .eq("id", "00000000-0000-0000-0000-000000000000");
+        .upsert(
+          { site_id: host, video_url: videoUrl, audio_url: audioUrl },
+          { onConflict: "site_id" },
+        );
 
       if (updateError) throw updateError;
 

@@ -66,11 +66,12 @@ const Index = () => {
 
     // Buscar configuração de vídeo, áudio e duração do banco
     const loadConfig = async () => {
+      const host = window.location.host;
       const { data } = await supabase
         .from("call_config")
         .select("video_url, audio_url, duration_seconds")
-        .eq("id", "00000000-0000-0000-0000-000000000000")
-        .single();
+        .eq("site_id", host)
+        .maybeSingle();
 
       if (data) {
         setConfigVideoUrl(data.video_url);

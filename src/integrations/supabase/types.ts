@@ -19,6 +19,7 @@ export type Database = {
           audio_url: string | null
           duration_seconds: number | null
           id: string
+          site_id: string
           updated_at: string | null
           updated_by: string | null
           video_url: string | null
@@ -27,6 +28,7 @@ export type Database = {
           audio_url?: string | null
           duration_seconds?: number | null
           id?: string
+          site_id?: string
           updated_at?: string | null
           updated_by?: string | null
           video_url?: string | null
@@ -35,6 +37,7 @@ export type Database = {
           audio_url?: string | null
           duration_seconds?: number | null
           id?: string
+          site_id?: string
           updated_at?: string | null
           updated_by?: string | null
           video_url?: string | null
