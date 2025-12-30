@@ -148,7 +148,6 @@ const Index = () => {
     setDuration(0);
     setInCall(true);
     setConnecting(false);
-    toast({ title: "Chamada iniciada", description: "Você está conectado à sala privada." });
   };
 
   // Garantir que o vídeo da sua câmera apareça assim que a chamada estiver ativa
@@ -209,9 +208,6 @@ const Index = () => {
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
-    }
-    if (reason) {
-      toast({ title: "Chamada finalizada", description: reason });
     }
   };
 
